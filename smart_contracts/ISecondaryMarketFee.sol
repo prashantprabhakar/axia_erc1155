@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
-interface ISecondaryMarketFee {
+interface ISecondaryMarketFees {
 
   struct Fee {
     address recipient;

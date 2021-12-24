@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "./ERC1155.sol";
+import "./Freezable.sol";
 
-contract BaseERC1155 is ERC1155, Ownable {
+contract BaseERC1155 is ERC1155, Freezable {
   
   constructor(string memory uri) ERC1155(uri) {
   }
@@ -15,7 +16,7 @@ contract BaseERC1155 is ERC1155, Ownable {
     uint256 amount,
     bytes memory data,
     string memory _uri
-  ) public onlyOwner {
+  ) public onlyAdmin {
     _mint(to, id, amount, data, _uri);
   }
 
@@ -25,7 +26,7 @@ contract BaseERC1155 is ERC1155, Ownable {
     uint256[] memory amounts,
     bytes memory data,
     string[] memory _uris
-  ) public onlyOwner {
+  ) public onlyAdmin {
     _mintBatch(to, ids, amounts, data, _uris);
   }
 

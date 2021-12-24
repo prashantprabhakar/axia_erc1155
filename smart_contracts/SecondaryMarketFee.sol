@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 import "./ISecondaryMarketFee.sol";
 import "./Ownership.sol";
 
 
-contract SecondaryMarketFee is ISecondaryMarketFee, Ownership {
+contract SecondaryMarketFee is ISecondaryMarketFees, Ownership {
 
   address public ownerContract;
   uint256 public decimals;
 
   mapping (uint256 => Fee[]) public fees;
-  Fee public gpsFees;
 
   /*
     * bytes4(keccak256('getFeeBps(uint256)')) == 0x0ebd4c7f
@@ -22,27 +21,12 @@ contract SecondaryMarketFee is ISecondaryMarketFee, Ownership {
     */
   bytes4 public constant _INTERFACE_ID_FEES = 0xb7799584;
 
-  event GPSBenefitirayUpdated(address _gpsBenefitiary, uint256 _gpsFees);
   event SecondarySaleFees(uint256 tokenId, Fee[] _fees);
 
   constructor() {
     decimals = 3; // this makes min fee to be 0.001% for any recipient
   }
 
-  /**
-   * @dev Update GPS address and fees. GPS benefitoary will be eligile to get `_gpsFees`
-   * when token is sold in secondary market
-   * Reverts if benefitiary address in empty
-   * @notice feees can be empty when GPS does not want any commission on trades
-   * @param _gpsBenefitiary GPS address that will be eligible to recieve commission in secondary market
-   * @param _gpsFees GPS fee percent that benefitiary will be eligible to recieve in secondary market
-   */
-  function updateGpsBenefitiaryDetails(address _gpsBenefitiary, uint256 _gpsFees) public onlyOwner {
-    require(_gpsBenefitiary != address(0), "Benefitiary address can not be blank");
-    gpsFees.recipient = _gpsBenefitiary;
-    gpsFees.value = _gpsFees;
-    emit GPSBenefitirayUpdated(_gpsBenefitiary, _gpsFees);
-  }
 
   /**
    * @dev Get fee recipients when asset is sold in secondary market
@@ -87,13 +71,12 @@ contract SecondaryMarketFee is ISecondaryMarketFee, Ownership {
       totalPercentage += _fees[i].value;
       fees[tokenId].push(_fees[i]);
     }
-    // add GPS benefitiary if benefitoary is present
-    if(gpsFees.value != 0) {
-      totalPercentage += gpsFees.value;
-      fees[tokenId].push(gpsFees);
-    }
     require(totalPercentage < 100 * 10 ** decimals, "percentage should be max 100");
     emit SecondarySaleFees(tokenId, _fees);
+  }
+
+  function removeFees(uint256 tokenId) internal {
+    delete(fees[tokenId]);
   }
 
 
