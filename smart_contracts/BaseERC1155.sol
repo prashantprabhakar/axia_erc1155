@@ -16,7 +16,11 @@ contract BaseERC1155 is ERC1155, Freezable {
     uint256 amount,
     bytes memory data,
     string memory _uri
-  ) public onlyAdmin {
+  )
+    public
+    onlyAdmin
+    isUnfreezed(to)
+  {
     _mint(to, id, amount, data, _uri);
   }
 
@@ -26,22 +30,41 @@ contract BaseERC1155 is ERC1155, Freezable {
     uint256[] memory amounts,
     bytes memory data,
     string[] memory _uris
-  ) public onlyAdmin {
+  ) public onlyAdmin isUnfreezed(to) {
     _mintBatch(to, ids, amounts, data, _uris);
   }
+
+  function safeTransferFrom(
+    address from,
+    address to,
+    uint256 id,
+    uint256 amount,
+    bytes memory data
+  ) isUnfreezed(from) isUnfreezed(to) public virtual override {
+    super.safeTransferFrom(from, to, id, amount, data);
+  }
+
+  function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) isUnfreezed(from) isUnfreezed(to) public virtual override {
+      super.safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
 
   function setTokenURIPrefix(string memory tokenURIPrefix) public onlyOwner {
     _setTokenURIPrefix(tokenURIPrefix);
   }
 
   /**
-    * @dev Internal function to set the token URI for a given token.
+    * @dev Public function to set the token URI for a given token.
     * Reverts if the token ID does not exist.
     * @param tokenId uint256 ID of the token to set its URI
     * @param uri string URI to assign
     */
-  function setTokenURI(uint256 tokenId, string memory uri) public {
-    //require(creators[tokenId] != address(0x0), "_setTokenURI: Token should exist");
+  function setTokenURI(uint256 tokenId, string memory uri) public onlyAdmin {
     super._setTokenURI(tokenId, uri);
   }
 

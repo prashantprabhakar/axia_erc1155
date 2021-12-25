@@ -25,14 +25,6 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
         _registerInterface(type(IERC1155).interfaceId);
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    // function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-    //     return
-    //         interfaceId == type(IERC1155).interfaceId ||
-    //         super.supportsInterface(interfaceId);
-    // }
 
     /**
      * @dev See {IERC1155-balanceOf}.
