@@ -77,6 +77,7 @@ contract CustomERC1155 is BaseERC1155, SecondaryMarketFee {
 
   function setTokenURI(uint256 tokenId, string memory uri, Signature calldata adminSignature, uint256 customNonce)
     public
+    shouldExist(tokenId)
   {
    bytes32 signedMessage = keccak256(abi.encode(
       address(this),
@@ -100,7 +101,7 @@ contract CustomERC1155 is BaseERC1155, SecondaryMarketFee {
       approved
     ));
     address signer = getSigner(signedMessage, userSignature);
-    require(!isFreezed[signer], "Signer is freezed");
+    require(!isFreezed(signer), "Signer is freezed");
     require(!isNonceUsed[signer][customNonce], "Nonce is already used");
     isNonceUsed[signer][customNonce] = true;
     _setApprovalForAll(_msgSender(), signer, approved);
@@ -121,7 +122,7 @@ contract CustomERC1155 is BaseERC1155, SecondaryMarketFee {
 
   function validateSigning(bytes32 signedMessage, Signature calldata adminSignature, uint256 customNonce) private returns(address) {
     address signer = getSigner(signedMessage, adminSignature);
-    require(!isFreezed[signer], "Signer is freezed");
+    require(!isFreezed(signer), "Signer is freezed");
     require(isAdmin(signer), "admin signature is required");
     require(!isNonceUsed[signer][customNonce], "Nonce is already used");
     isNonceUsed[signer][customNonce] = true;

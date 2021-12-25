@@ -16,6 +16,7 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
 
     // Mapping from token ID to account balances
     mapping(uint256 => mapping(address => uint256)) private _balances;
+    mapping (uint256 => uint256) public tokenSupply;
 
     // Mapping from account to operator approvals
     mapping(address => mapping(address => bool)) private _operatorApprovals;
@@ -23,6 +24,11 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
     
     constructor(string memory tokenURIPrefix) ERC1155MetadataURI(tokenURIPrefix) {
         _registerInterface(type(IERC1155).interfaceId);
+    }
+
+    modifier shouldExist(uint256 tokenId) {
+        require(totalSupply(tokenId) !=0, "token does not exists");
+        _;
     }
 
 
@@ -215,6 +221,7 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
         _beforeTokenTransfer(operator, address(0), to, _asSingletonArray(id), _asSingletonArray(amount), data);
 
         _balances[id][to] += amount;
+        tokenSupply[id] += amount;
         _setTokenURI(id, _uri);
         emit TransferSingle(operator, address(0), to, id, amount);
 
@@ -246,6 +253,7 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
 
         for (uint256 i = 0; i < ids.length; i++) {
             _balances[ids[i]][to] += amounts[i];
+            tokenSupply[ids[i]] += amounts[i];
             _setTokenURI(ids[i], _uris[i]);
         }
 
@@ -278,6 +286,7 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
         unchecked {
             _balances[id][from] = fromBalance - amount;
         }
+        tokenSupply[id] -= amount;
 
         emit TransferSingle(operator, from, address(0), id, amount);
     }
@@ -310,6 +319,7 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
             unchecked {
                 _balances[id][from] = fromBalance - amount;
             }
+            tokenSupply[ids[i]] -= amounts[i];
         }
 
         emit TransferBatch(operator, from, address(0), ids, amounts);
@@ -408,5 +418,11 @@ contract ERC1155 is Context, ERC165, IERC1155, ERC1155MetadataURI {
         array[0] = element;
 
         return array;
+    }
+
+    function totalSupply(
+        uint256 _id
+    ) public view returns (uint256) {
+        return tokenSupply[_id];
     }
 }

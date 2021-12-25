@@ -64,7 +64,7 @@ contract BaseERC1155 is ERC1155, Freezable {
     * @param tokenId uint256 ID of the token to set its URI
     * @param uri string URI to assign
     */
-  function setTokenURI(uint256 tokenId, string memory uri) public onlyAdmin {
+  function setTokenURI(uint256 tokenId, string memory uri) public onlyAdmin shouldExist(tokenId) {
     super._setTokenURI(tokenId, uri);
   }
 
